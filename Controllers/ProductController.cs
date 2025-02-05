@@ -30,10 +30,11 @@ namespace Mailo.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> _CreateReviewPartial(ReviewViewModel r)
         {
-            if (string.IsNullOrEmpty(r.Content) && r.Rating == null && (r.clientFile == null || r.clientFile.Length == 0))
+            if (string.IsNullOrEmpty(r.Content) && !r.Rating.HasValue && (r.clientFile == null || r.clientFile.Length == 0))
             {
-                ModelState.AddModelError("", "You must add at least a comment, rating or photo.");
-                return View("ProductDetails", r);           
+                ModelState.AddModelError("", "You must add at least a comment, rating, or photo.");
+                ViewBag.ProductId = r.ProductId;
+                return RedirectToAction("ProductDetails", "Product", new { id = r.ProductId }); // ✅ الحل الصحيح
             }
 
             var product = await _context.Products.FirstOrDefaultAsync(p => p.ID == r.ProductId);
@@ -51,16 +52,15 @@ namespace Mailo.Controllers
                 Content = r.Content,
                 UserId = user.ID,
                 ProductId = r.ProductId,
-                Rating = r.Rating ?? 0, // إذا لم يتم تحديد تقييم، اعتبره 0
+                Rating = r.Rating.HasValue ? r.Rating.Value : (int?)null,
                 Date = DateTime.Now
             };
 
-            // التعامل مع رفع الصورة (إذا كانت موجودة)
+            // ✅ التعامل مع رفع الصورة
             if (r.clientFile != null && r.clientFile.Length > 0)
             {
                 string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
 
-                // التأكد من وجود مجلد "uploads"، وإذا لم يكن موجودًا يتم إنشاؤه
                 if (!Directory.Exists(uploadsFolder))
                 {
                     Directory.CreateDirectory(uploadsFolder);
@@ -74,14 +74,15 @@ namespace Mailo.Controllers
                     await r.clientFile.CopyToAsync(stream);
                 }
 
-                review.ImageUrl = "/uploads/" + fileName;  // حفظ المسار في قاعدة البيانات
+                review.ImageUrl = "/uploads/" + fileName;
             }
 
             await _context.Reviews.AddAsync(review);
             await _context.SaveChangesAsync();
 
-            TempData["Success"] = "تمت إضافة التقييم بنجاح!";
-            return RedirectToAction("ProductDetails", "Product", new { id = product.ID });
+            TempData["Success"] = "Review added successfully!";
+
+            return RedirectToAction("ProductDetails", "Product", new { id = r.ProductId }); // ✅ الحل النهائي
         }
 
 
