@@ -1,0 +1,98 @@
+﻿@model Mailo.Models.ColorImage
+
+@{
+    ViewData["Title"] = "Add New Color Image";
+}
+
+<style>
+    .container1 {
+        background-color: rgba(143, 217, 251, 0.2);
+        border-radius: 10px;
+        padding: 2%;
+        width: 50%;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.4);
+        margin: auto;
+    }
+
+    .form-control {
+        width: 304px;
+    }
+</style>
+
+<h2 class="text-primary">Add New Color Image</h2>
+<hr />
+
+<div class="container1 justify-center mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-4">
+            <form method="post" asp-action="Create" enctype="multipart/form-data">
+                <div asp-validation-summary="All"></div>
+
+                <div class="form-group mb-3">
+                    <label for="ProductId">Product</label>
+                    <select asp-for="ProductId" class="form-control" asp-items="ViewBag.Products">
+                        <option value="">Select Product</option>
+                    </select>
+                </div>
+
+                <h4>Available Colors:</h4>
+                <div id="colorOptions">
+                    @if (ViewBag.Colors != null)
+                    {
+                        @foreach (var color in ViewBag.Colors)
+                        {
+                            <label>
+                                <input type="checkbox" class="color-checkbox" value="@color.Id" data-name="@color.ColorName" />
+                                @color.ColorName
+                            </label>
+                            <br />
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-danger">⚠ No colors available.</p>
+                    }
+                </div>
+
+                <h4>Upload Images:</h4>
+                <div id="imageUploads"></div>
+
+                <hr />
+                <button type="submit" class="btn btn-success">Save</button>
+                <a asp-action="Index" class="btn btn-secondary">Back to Images</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            let colorCheckboxes = document.querySelectorAll(".color-checkbox");
+            let imageUploadsContainer = document.getElementById("imageUploads");
+
+            function updateImageUploads() {
+                imageUploadsContainer.innerHTML = "";
+
+                let selectedColors = Array.from(colorCheckboxes).filter(c => c.checked);
+
+                selectedColors.forEach(color => {
+                    let colorId = color.value;
+                    let colorName = color.dataset.name;
+
+                    let imageUploadHtml = `
+                                <div class="image-upload">
+                                    <label>Upload Image (${colorName}):</label>
+                                    <input type="hidden" name="ColorIds" value="${colorId}" />
+                                    <input type="file" name="ImageFiles" class="form-control" required />
+                                </div>
+                            `;
+                    imageUploadsContainer.innerHTML += imageUploadHtml;
+                });
+            }
+
+            colorCheckboxes.forEach(cb => cb.addEventListener("change", updateImageUploads));
+        });
+    </script>
+}

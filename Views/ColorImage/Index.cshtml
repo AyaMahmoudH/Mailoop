@@ -1,0 +1,42 @@
+﻿@model IEnumerable<Mailo.Models.ColorImage>
+
+@{
+    ViewData["Title"] = "Color Images";
+}
+
+<h2>Color Images</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>Color</th>
+            <th>Image</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var image in Model)
+        {
+            <tr>
+                <td>@image.Product?.Name</td>
+                <td>@image.Color?.ColorName</td>
+                <td>
+                    @if (!string.IsNullOrEmpty(image.imageSrc))
+                    {
+                        <img src="@image.imageSrc" class="img-thumbnail" style="width: 100px; height: 100px;" />
+                    }
+                    else
+                    {
+                        <span>No Image</span>
+                    }
+                </td>
+                <td>
+                    <a asp-action="Delete" asp-route-id="@image.Id" class="btn btn-danger btn-sm">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-action="Create" class="btn btn-primary">Add New Image</a>

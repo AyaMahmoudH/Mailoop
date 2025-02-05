@@ -1,0 +1,143 @@
+﻿@model IEnumerable<Product>
+@{
+    ViewData["Title"] = "Products";
+}
+<style>
+    /* صندوق الفلتر بتصميم أنيق */
+    .filter-box {
+        background: #f8f9fa;
+        border-left: 4px solid #007bff;
+        display: none;
+        transition: all 0.5s ease-in-out;
+    }
+
+    /* تحسين شكل القائمة المنسدلة */
+    .stylish-select {
+        border: 2px solid #007bff;
+        border-radius: 5px;
+        padding: 8px;
+        font-size: 16px;
+        outline: none;
+        transition: border-color 0.3s ease-in-out;
+    }
+
+        .stylish-select:focus {
+            border-color: #0056b3;
+        }
+
+    /* زر الفلترة مع تأثير جميل */
+    #toggleCategory {
+        transition: all 0.3s ease-in-out;
+    }
+
+        #toggleCategory:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
+</style>
+
+<div class="container p-3">
+    <div class="d-block d-md-flex justify-content-between align-items-center">
+            <h1 class="text-primary">Our Products</h1>
+            <a asp-action="New" asp-controller="User" class="btn btn-primary">Add Product</a>
+        </div>
+    <button id="toggleCategory" class="btn btn-primary mt-3 shadow-sm fw-bold">
+        <i class="bi bi-funnel"></i> Filter Products
+    </button>
+
+    <div id="categoryFilter" class="filter-box p-3 mt-3 rounded shadow-sm">
+        <form method="get" asp-action="Index_A">
+            <label class="fw-bold text-muted mb-2">Select Category</label>
+            <select name="categoryId" class="form-control stylish-select">
+                <option value="">All Categories</option>
+                @foreach (var category in ViewBag.Categories)
+                {
+                    <option value="@category.Value">@category.Text</option>
+                }
+            </select>
+            <button type="submit" class="btn btn-success mt-3 w-100">
+                <i class="bi bi-check-circle"></i> Apply Filter
+            </button>
+        </form>
+    </div>
+
+    <form method="get" asp-action="Index_A" asp-controller="User" class="d-flex justify-content-center my-4">
+        <input type="text" name="text" class="form-control w-75 border-primary rounded-2" />
+        <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i></button>
+    </form>
+
+    <div class="row justify-content-center">
+
+        @if (!Model?.Any() ?? true)
+        {
+            <h1 class="text-center text-muted">No Products Available</h1>
+        }
+        else
+        {
+
+            @foreach (var item in Model)
+            {
+                var availableVariants = item.Variants?.Where(v => v.Quantity > 0).ToList();
+                <div class="col-12 col-sm-6 col-md-4 col-xl-3 p-2 d-flex justify-content-center border-0">
+                    <div class="card shadow-sm position-relative border-1 d-flex flex-column justify-content-between">
+                        <a asp-action="ProductDetails" asp-controller="Product" asp-route-id="@item.ID" class="text-decoration-none text-black">
+                        @if (availableVariants?.Any() == false){
+                            <h6 class="text-white bg-danger position-absolute rounded-3" style=" top:5px; right:5px;padding:10px;">Sold Out</h6>
+                        }
+                        <img src="@item.imageSrc" class="card-img-top" alt="@item.Name">
+                        </a>
+                        <div class="card-body">
+                            <a asp-action="ProductDetails" asp-controller="Product" asp-route-id="@item.ID" class="text-decoration-none text-black">
+
+                            <h3 class="card-title fw-bold">@item.Name</h3>
+                            <p class="card-text">@item.Description</p>
+
+                            <h4 class="mt-2 text-primary">
+                                @item.TotalPrice.ToString("C")
+                                @if (item.TotalPrice != item.Price)
+                                {
+                                    <span class="text-muted fs-6">
+                                        <del class="text-danger">@item.Price.ToString("C")</del>
+                                    </span>
+                                }
+                            </h4>
+                            </a>
+                            @if (availableVariants?.Any() == false)
+                            {
+                                <h5 class="text-danger mt-3">Sold Out</h5>
+
+                            }
+                            <div class="d-flex mt-2 justify-content-between">
+                            <a asp-controller="User" asp-action="Edit" asp-route-id="@item.ID" class="btn btn-primary col-5">
+                                    <i class="bi bi-pen"></i><span> Edit</span>
+                            </a>
+                            <a asp-controller="User" asp-action="Delete" asp-route-id="@item.ID" class="btn btn-danger col-5">
+                                    <i class="bi bi-trash3"></i><span class="d-inline d-md-none d-lg-inline"> Delete</span>
+                            </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+    <a asp-action="ProductManagement" asp-controller="Product" class="btn btn-primary text-decoration-none my-3">Product Management</a>
+
+</div>
+
+<script>
+    document.getElementById("toggleCategory").addEventListener("click", function () {
+        var filterDiv = document.getElementById("categoryFilter");
+        if (filterDiv.style.display === "none" || filterDiv.style.display === "") {
+            filterDiv.style.display = "block";
+            filterDiv.classList.add("animate__animated", "animate__fadeInDown"); // تأثير دخول أنيق
+        } else {
+            filterDiv.classList.remove("animate__fadeInDown");
+            filterDiv.classList.add("animate__fadeOutUp"); // تأثير خروج أنيق
+            setTimeout(() => {
+                filterDiv.style.display = "none";
+                filterDiv.classList.remove("animate__fadeOutUp");
+            }, 500);
+        }
+    });
+</script>
