@@ -146,82 +146,6 @@
             transform: scale(1.05);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
-
-    .rating-stars {
-        text-align: center;
-        margin-bottom: 15px;
-    }
-
-        .rating-stars i {
-            font-size: 30px;
-            color: #ccc;
-            cursor: pointer;
-            transition: color 0.3s;
-            padding: 5px;
-        }
-
-            .rating-stars i.active,
-            .rating-stars i:hover {
-                color: #ff9800;
-            }
-
-    /* .btn {
-            width: 100%;
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            font-size: 18px;
-            font-weight: bold;
-            color: white;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .btn-primary {
-            background-color: #007bff;
-        }
-
-            .btn-primary:hover {
-                background-color: #0056b3;
-            }
-     */
-    .file-upload {
-        margin-top: 15px;
-    }
-
-        .file-upload label {
-            font-size: 16px;
-            color: #495057;
-            cursor: pointer;
-        }
-
-    .custom-file-label {
-        background-color: #e9ecef;
-        padding: 8px 15px;
-        border: 1px solid #ced4da;
-        border-radius: 5px;
-        cursor: pointer;
-        text-align: center;
-        margin-top: 5px;
-    }
-
-    .image-preview {
-        display: none;
-        justify-content: center;
-        align-items: center;
-        margin-top: 15px;
-    }
-
-        .image-preview img {
-            max-width: 100%;
-            max-height: 200px;
-            border-radius: 5px;
-        }
-
-    .text-danger {
-        color: red;
-        font-size: 14px;
-    }
 </style>
 @{
     ViewData["Title"] = "Product Details";
@@ -279,44 +203,8 @@
             </div>
         </div>
     </div>
-    <div class="review-container mt-4">
-        <h3>Add Your Review</h3>
-        <form id="reviewForm" asp-action="_CreateReviewPartial" asp-controller="Product" method="post" enctype="multipart/form-data">
-            <div asp-validation-summary="All" class="text-danger"></div>
-            <input type="hidden" name="ProductId" value="@Model.ID" />
+    @await Html.PartialAsync("~/Views/Product/_CreateReviewPartial.cshtml", new ReviewViewModel { ProductId = Model.ID })
 
-            <!-- 📝 حقل التعليق -->
-            <div>
-                <textarea class="form-control" name="Content" placeholder="Write your comment here..." rows="5"></textarea>
-            </div>
-
-            <!-- ⭐ تقييم النجوم -->
-            <div class="rating-stars mt-2">
-                <label>Rating:</label>
-                <div id="stars">
-                    @for (var i = 1; i <= 5; i++)
-                    {
-                        <i class="fas fa-star" data-value="@i"></i>
-                    }
-                </div>
-                <input type="hidden" name="Rating" />
-            </div>
-
-            <!-- 📸 رفع صورة -->
-            <div class="file-upload mt-2">
-                <label for="uploadImage">Upload a photo (optional):</label>
-                <input id="uploadImage" type="file" name="clientFile" accept="image/*" hidden />
-                <label class="custom-file-label" for="uploadImage">Choose a file...</label>
-            </div>
-
-            <!-- ✅ معاينة الصورة قبل الرفع -->
-            <div class="image-preview" id="imagePreviewContainer">
-                <img id="imagePreview" src="#" alt="Preview" />
-            </div>
-
-            <button type="submit" class="btn btn-primary mt-2">Submit</button>
-        </form>
-    </div>
     <!-- قسم التقييمات -->
     <div class="mt-5">
         <h3 class="border-bottom pb-2">Reviews:</h3>
